@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<context:component-scan base-package="com.transactions.app" />
+	<context:annotation-config />
+
+	<!-- SQL connection -->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/practicejdbc" />
+		<property name="username" value="root" />
+		<property name="password" value="root" />
+		<property name="initialSize" value="40" />
+		<property name="maxTotal" value="40" />
+	</bean>
+	<!-- JPA -->
+	<bean id="emf"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceXmlLocation" value="persistence.xml" />
+		<property name="dataSource" ref="dataSource" />
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+	</bean>
+	<bean id="jpaVendorAdapter"
+		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<property name="database" value="MYSQL" />
+		<property name="showSql" value="true" />
+		<property name="generateDdl" value="false" />
+		<property name="databasePlatform" value="org.hibernate.dialect.MySQLDialect" />
+	</bean>
+
+	<!-- Persistence -->
+	<bean
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+	<bean
+		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+	<!-- JPA Transactions -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		       <property name="entityManagerFactory" ref="emf" />
+		        <property name="jpaDialect" ref="jpaDialect" />
+	</bean>
+	    <bean id = "jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect"/>
+	    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+	        <property name="transactionManager" ref="transactionManager"/>
+	    </bean>
+
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED"/>
+			<tx:method name="*" propagation="SUPPORTS" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+	<aop:config>
+		<aop:advisor advice-ref="txAdvice"
+					 pointcut="execution(* *..LecturesWorker.*(..))"/>
+	</aop:config>
+
+
+
+
+
+
+
+
+
+
+	<bean id="lectureWorker" class="com.transactions.app.worker.LecturesWorker"></bean>
+	<bean id="teacherWorker" class="com.transactions.app.worker.TeachersWorker"></bean>
+	<tx:annotation-driven />
+
+
+
+	<!-- <bean id="jdbcTemplate" class="org.springframework.jdbc.core.simple.SimpleJdbcTemplate"> 
+		<constructor-arg ref="dataSource" /> </bean> <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"> 
+		<property name="dataSource" ref="dataSource" /> <property name="packagesToScan" 
+		value="com.dbpractice.app.db_practice.data.entities" /> <property name="hibernateProperties"> 
+		<props> <prop key="dialect">org.hibernate.dialect.MySQLDialect</prop> <prop 
+		key="hibernate.show_sql">true</prop> <prop key="hibernate.hbm2ddl.auto">update</prop> 
+		</props> </property> </bean> <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" 
+		/> <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"> 
+		<property name="sessionFactory"> <ref bean="sessionFactory" /> </property> 
+		</bean> <tx:annotation-driven /> <bean id="teacherWorker" class="com.dbpractice.app.db_practice.Worker.WorkWithTeacher" 
+		/> <bean id="worker" class="com.dbpractice.app.db_practice.Worker.WorkWithStudents" 
+		/> -->
+
+
+</beans>

@@ -1,23 +1,12 @@
-CREATE TABLE credit_cards
-(
-    number VARCHAR(255) PRIMARY KEY,
-    expiryDate VARCHAR(255),
-    controlNumber INT,
-    creditCardType VARCHAR(255)
-);
 
-CREATE TABLE lecturers
+CREATE TABLE teachers
 (
-    prizv VARCHAR(255) ,
-    name VARCHAR(255),
-    fath VARCHAR(255),
-    degree VARCHAR(255),
+    prizv VARCHAR(20),
+    name VARCHAR(20),
+    fath VARCHAR(20),
+    degree VARCHAR(100),
     dateOfBirth DATE,
-    card_fk VARCHAR(255),
-  lecture_fk INT,
-  PRIMARY KEY (prizv,name,fath),
-  FOREIGN KEY (card_fk) REFERENCES credit_cards(number),
-  FOREIGN KEY (lecture_fk) REFERENCES lectures(ID)
+    CONSTRAINT teachers_prizv_name_fath_pk PRIMARY KEY (prizv, name, fath)
 );
 
 CREATE TABLE lectures
